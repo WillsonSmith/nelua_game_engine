@@ -98,6 +98,15 @@ local function poll_game()
   nextmove = now + MOVE_DELAY
 end
 
+local function draw_background(color: Color)
+  SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255)
+  SDL_RenderClear(renderer)
+end
+
+local function draw()
+  draw_background(COLOR_BLACK)
+end
+
 local function main(title: string)
   SDL_Init(SDL_INIT_VIDEO)
 
@@ -111,6 +120,7 @@ local function main(title: string)
 
   repeat
     poll_events()
+    draw()
 
     -- Swap buffers
     SDL_RenderPresent(renderer)
