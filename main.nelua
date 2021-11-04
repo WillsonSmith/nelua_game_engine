@@ -1,0 +1,125 @@
+require 'config'
+
+-- import SDL structures
+local SDL_Event <cimport> = @record{
+  type: uint32,
+  padding: [56]byte
+}
+local SDL_Keysym <cimport> = @record{
+  scancode: cint,
+  sym: int32,
+  mod: uint16,
+  unused: uint32
+}
+local SDL_KeyboardEvent <cimport> = @record{
+  type: uint32,
+  timestamp: uint32,
+  windowID: uint32,
+  state: uint8,
+  repeated: uint8,
+  padding: uint16,
+  keysym: SDL_Keysym
+}
+local SDL_Rect <cimport> = @record{
+  x: cint, y: cint,
+  w: cint, h: cint,
+}
+local SDL_Window <cimport> = @record{}
+local SDL_Renderer <cimport> = @record{}
+
+-- import SDL constants
+local SDL_INIT_VIDEO <comptime> = 0x20
+local SDL_WINDOWPOS_UNDEFINED <comptime> = 0x1fff0000
+local SDL_WINDOW_OPENGL <comptime> = 0x2
+local SDL_QUIT <comptime> = 0x100
+local SDL_KEYDOWN <comptime> = 0x300
+local SDLK_RIGHT <comptime> = 79 | 0x40000000
+local SDLK_LEFT <comptime> = 80 | 0x40000000
+local SDLK_DOWN <comptime> = 81 | 0x40000000
+local SDLK_UP <comptime> = 82 | 0x40000000
+local SDL_RENDERER_ACCELERATED <comptime> = 0x2
+local SDL_RENDERER_PRESENTVSYNC <comptime> = 0x4
+
+-- import SDL functions
+local function SDL_Init(flags: uint32): int32 <cimport> end
+local function SDL_CreateWindow(title: cstring, x: cint, y: cint, w: cint, h: cint, flags: uint32): *SDL_Window <cimport> end
+local function SDL_Quit() <cimport> end
+local function SDL_DestroyWindow(window: *SDL_Window) <cimport> end
+local function SDL_PollEvent(event: *SDL_Event): int32 <cimport> end
+local function SDL_CreateRenderer(window: *SDL_Window, index: cint, flags: uint32): *SDL_Renderer <cimport> end
+local function SDL_DestroyRenderer(renderer: *SDL_Renderer) <cimport> end
+local function SDL_RenderPresent(renderer: *SDL_Renderer) <cimport> end
+local function SDL_RenderClear(renderer: *SDL_Renderer): cint <cimport> end
+local function SDL_SetRenderDrawColor(renderer: *SDL_Renderer, r: uint8, g: uint8, b: uint8, a: uint8): cint <cimport> end
+local function SDL_RenderFillRect(renderer: *SDL_Renderer, rect: *SDL_Rect): cint <cimport> end
+local function SDL_GetTicks(): uint32 <cimport> end
+-- end SDL structures
+
+-- game types
+local Point2D = @record{x: integer, y: integer}
+local Direction = @enum(byte){NONE=0, UP, DOWN, RIGHT, LEFT}
+local Color = @record{r: byte, g: byte, b: byte}
+
+-- Game constants
+local TILE_SIZE <comptime> = 64
+local GRID_SIZE <comptime> = 12
+local SCREEN_SIZE <comptime> = TILE_SIZE * GRID_SIZE
+local MOVE_DELAY <comptime> = 128
+local COLOR_RED <const> = Color{r=255, g=96, b=96}
+local COLOR_GREEN <const> = Color{r=96, g=255, b=96}
+local COLOR_BLACK <const> = Color{r=0, g=0, b=0}
+
+-- game state variables
+local renderer
+local quit = false
+local nextmove
+
+local function poll_events()
+  local event: SDL_Event
+  while SDL_PollEvent(&event) ~= 0 do
+    switch event.type
+    case SDL_QUIT then
+      quit = true
+    case SDL_KEYDOWN then
+      local kevent = (@*SDL_KeyboardEvent)(&event)
+      switch kevent.keysym.sym
+      case SDLK_UP then
+      case SDLK_DOWN then
+      case SDLK_RIGHT then
+      case SDLK_LEFT then
+      end
+    end
+  end
+end
+
+local function poll_game()
+  local now = SDL_GetTicks()
+  if now < nextmove then return end
+  nextmove = now + MOVE_DELAY
+end
+
+local function main(title: string)
+  SDL_Init(SDL_INIT_VIDEO)
+
+  local window = SDL_CreateWindow(title,
+    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    SCREEN_SIZE, SCREEN_SIZE, SDL_WINDOW_OPENGL)
+  assert(window, "Could not create window")
+
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)
+  assert(renderer, "Could not create renderer")
+
+  repeat
+    poll_events()
+
+    -- Swap buffers
+    SDL_RenderPresent(renderer)
+  until quit
+
+  -- cleanup and finish
+  SDL_DestroyRenderer(renderer)
+  SDL_DestroyWindow(window)
+  SDL_Quit()
+end
+
+main("My new game")
