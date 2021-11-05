@@ -1,0 +1,9 @@
+global Game = @record{title: string}
+
+function Game.create(title: string): Game
+  return (@Game){title}
+end
+
+function Game:state(): string
+  return self.title
+end

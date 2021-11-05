@@ -1,4 +1,5 @@
 require 'config'
+require 'libs/Game'
 
 -- import SDL structures
 local SDL_Event <cimport> = @record{
@@ -25,6 +26,7 @@ local SDL_Rect <cimport> = @record{
   w: cint, h: cint,
 }
 local SDL_Window <cimport> = @record{}
+local SDL_Texture <cimport> = @record{}
 local SDL_Renderer <cimport> = @record{}
 
 -- import SDL constants

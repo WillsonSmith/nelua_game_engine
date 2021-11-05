@@ -1,0 +1,6 @@
+local SDL_Texture <cimport> = @record{}
+global Sprite = @record{texture: SDL_Texture}
+
+function Sprite.create(texture: SDL_Texture)
+  return (@Sprite){texture}
+end

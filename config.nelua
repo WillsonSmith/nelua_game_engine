@@ -2,15 +2,9 @@
 if ccinfo.is_emscripten then
   cflags '-s USE_SDL=2 -s ASYNCIFY=1'
 end
-os.execute('sdl2-config --libs --cflags > sdl2-config')
 
--- Get SDL config
-local f = io.open('sdl2-config')
-for line in f:lines() do
-  cflags(line)
-end
-f:close();
-
--- Link libraries
+cflags '-I/opt/homebrew/include/SDL2 -D_THREAD_SAFE'
+cflags '-L/opt/homebrew/lib -lSDL2 -lSDL2_image'
 linklib 'SDL2'
+linklib 'SDL2_image'
 ]]
