@@ -115,8 +115,8 @@ local function draw()
   local windowRect: SDL_Rect;
   windowRect.x = 0
   windowRect.y = 0
-  windowRect.w = 140
-  windowRect.h = 200
+  windowRect.w = 75
+  windowRect.h = 132
 
   local textureRect: SDL_Rect;
   textureRect.x = 0
@@ -125,8 +125,8 @@ local function draw()
   -- SDL_QueryTexture(sprite.sprite_sheet, nil, nil, &textureRect.w, &textureRect.h);
 
   -- textureRect.w = textureRect.w / 8
-  textureRect.w = 100
-  textureRect.h = 200
+  textureRect.w = 75
+  textureRect.h = 132
 
   SDL_RenderCopy(renderer, sprite.texture, textureRect, windowRect);
 end
