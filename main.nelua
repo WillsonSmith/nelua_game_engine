@@ -1,5 +1,6 @@
 require 'config'
 require 'libs/Game'
+require 'libs/Sprite'
 
 -- import SDL structures
 local SDL_Event <cimport> = @record{
@@ -52,9 +53,11 @@ local function SDL_CreateRenderer(window: *SDL_Window, index: cint, flags: uint3
 local function SDL_DestroyRenderer(renderer: *SDL_Renderer) <cimport> end
 local function SDL_RenderPresent(renderer: *SDL_Renderer) <cimport> end
 local function SDL_RenderClear(renderer: *SDL_Renderer): cint <cimport> end
+global function SDL_RenderCopy(renderer: *SDL_Renderer, texture: *SDL_Texture, srcrect: *SDL_Rect, dstrect: *SDL_Rect): cint <cimport> end
 local function SDL_SetRenderDrawColor(renderer: *SDL_Renderer, r: uint8, g: uint8, b: uint8, a: uint8): cint <cimport> end
 local function SDL_RenderFillRect(renderer: *SDL_Renderer, rect: *SDL_Rect): cint <cimport> end
 local function SDL_GetTicks(): uint32 <cimport> end
+global function SDL_QueryTexture(texture: *SDL_Texture, format: *uint32, access: *cint, w: *cint, h: *cint): cint <cimport> end
 -- end SDL structures
 
 -- game types
@@ -107,6 +110,25 @@ end
 
 local function draw()
   draw_background(COLOR_BLACK)
+  local sprite = Sprite.create(renderer, "assets/sprites/capguy-walk.png", 0, 0)
+
+  local windowRect: SDL_Rect;
+  windowRect.x = 0
+  windowRect.y = 0
+  windowRect.w = 140
+  windowRect.h = 200
+
+  local textureRect: SDL_Rect;
+  textureRect.x = 0
+  textureRect.y = 0
+
+  -- SDL_QueryTexture(sprite.sprite_sheet, nil, nil, &textureRect.w, &textureRect.h);
+
+  -- textureRect.w = textureRect.w / 8
+  textureRect.w = 100
+  textureRect.h = 200
+
+  SDL_RenderCopy(renderer, sprite.texture, textureRect, windowRect);
 end
 
 local function main(title: string)

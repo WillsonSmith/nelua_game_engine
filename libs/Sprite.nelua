@@ -1,17 +1,148 @@
 local SDL_Texture <cimport> = @record{}
-global Sprite = @record{
-  texture: SDL_Texture,
-  width: number,
-  height: number,
-  offsetX: number,
-  offsetY: number
+local SDL_Renderer <cimport> = @record{}
+local SDL_BlitMap: type <cimport> = @record{}
+
+local SDL_Rect: type <cimport> = @record{
+  x: cint,
+  y: cint,
+  w: cint,
+  h: cint
 }
 
-function Sprite.create(texture: SDL_Texture, width: number, height: number)
-  return (@Sprite){texture, width, height, offsetX = 0, offsetY = 0}
+local SDL_Color: type <cimport> = @record{
+  r: uint8,
+  g: uint8,
+  b: uint8,
+  a: uint8
+}
+
+local SDL_Palette: type <cimport> = @record{
+  ncolors: cint,
+  colors: *SDL_Color,
+  version: uint32,
+  refcount: cint
+}
+local SDL_PixelFormat: type <cimport> = @record{}
+local SDL_PixelFormat = @record{
+  format: uint32,
+  palette: *SDL_Palette,
+  BitsPerPixel: uint8,
+  BytesPerPixel: uint8,
+  padding: [2]uint8,
+  Rmask: uint32,
+  Gmask: uint32,
+  Bmask: uint32,
+  Amask: uint32,
+  Rloss: uint8,
+  Gloss: uint8,
+  Bloss: uint8,
+  Aloss: uint8,
+  Rshift: uint8,
+  Gshift: uint8,
+  Bshift: uint8,
+  Ashift: uint8,
+  refcount: cint,
+  next: *SDL_PixelFormat
+}
+local SDL_PixelFormatEnum: type <cimport> = @enum(cint){
+  SDL_PIXELFORMAT_UNKNOWN = 0,
+  SDL_PIXELFORMAT_INDEX1LSB = 286261504,
+  SDL_PIXELFORMAT_INDEX1MSB = 287310080,
+  SDL_PIXELFORMAT_INDEX4LSB = 303039488,
+  SDL_PIXELFORMAT_INDEX4MSB = 304088064,
+  SDL_PIXELFORMAT_INDEX8 = 318769153,
+  SDL_PIXELFORMAT_RGB332 = 336660481,
+  SDL_PIXELFORMAT_XRGB4444 = 353504258,
+  SDL_PIXELFORMAT_RGB444 = 353504258,
+  SDL_PIXELFORMAT_XBGR4444 = 357698562,
+  SDL_PIXELFORMAT_BGR444 = 357698562,
+  SDL_PIXELFORMAT_XRGB1555 = 353570562,
+  SDL_PIXELFORMAT_RGB555 = 353570562,
+  SDL_PIXELFORMAT_XBGR1555 = 357764866,
+  SDL_PIXELFORMAT_BGR555 = 357764866,
+  SDL_PIXELFORMAT_ARGB4444 = 355602434,
+  SDL_PIXELFORMAT_RGBA4444 = 356651010,
+  SDL_PIXELFORMAT_ABGR4444 = 359796738,
+  SDL_PIXELFORMAT_BGRA4444 = 360845314,
+  SDL_PIXELFORMAT_ARGB1555 = 355667970,
+  SDL_PIXELFORMAT_RGBA5551 = 356782082,
+  SDL_PIXELFORMAT_ABGR1555 = 359862274,
+  SDL_PIXELFORMAT_BGRA5551 = 360976386,
+  SDL_PIXELFORMAT_RGB565 = 353701890,
+  SDL_PIXELFORMAT_BGR565 = 357896194,
+  SDL_PIXELFORMAT_RGB24 = 386930691,
+  SDL_PIXELFORMAT_BGR24 = 390076419,
+  SDL_PIXELFORMAT_XRGB8888 = 370546692,
+  SDL_PIXELFORMAT_RGB888 = 370546692,
+  SDL_PIXELFORMAT_RGBX8888 = 371595268,
+  SDL_PIXELFORMAT_XBGR8888 = 374740996,
+  SDL_PIXELFORMAT_BGR888 = 374740996,
+  SDL_PIXELFORMAT_BGRX8888 = 375789572,
+  SDL_PIXELFORMAT_ARGB8888 = 372645892,
+  SDL_PIXELFORMAT_RGBA8888 = 373694468,
+  SDL_PIXELFORMAT_ABGR8888 = 376840196,
+  SDL_PIXELFORMAT_BGRA8888 = 377888772,
+  SDL_PIXELFORMAT_ARGB2101010 = 372711428,
+  SDL_PIXELFORMAT_RGBA32 = 376840196,
+  SDL_PIXELFORMAT_ARGB32 = 377888772,
+  SDL_PIXELFORMAT_BGRA32 = 372645892,
+  SDL_PIXELFORMAT_ABGR32 = 373694468,
+  SDL_PIXELFORMAT_YV12 = 842094169,
+  SDL_PIXELFORMAT_IYUV = 1448433993,
+  SDL_PIXELFORMAT_YUY2 = 844715353,
+  SDL_PIXELFORMAT_UYVY = 1498831189,
+  SDL_PIXELFORMAT_YVYU = 1431918169,
+  SDL_PIXELFORMAT_NV12 = 842094158,
+  SDL_PIXELFORMAT_NV21 = 825382478,
+  SDL_PIXELFORMAT_EXTERNAL_OES = 542328143
+}
+
+local SDL_Surface: type <cimport> = @record{
+  flags: uint32,
+  format: *SDL_PixelFormat,
+  w: cint,
+  h: cint,
+  pitch: cint,
+  pixels: pointer,
+  userdata: pointer,
+  locked: cint,
+  list_blitmap: pointer,
+  clip_rect: SDL_Rect,
+  map: *SDL_BlitMap,
+  refcount: cint
+}
+
+local function SDL_FreeSurface(surface: *SDL_Surface): void <cimport> end
+
+local function SDL_CreateTextureFromSurface(renderer: *SDL_Renderer, surface: *SDL_Surface): *SDL_Texture <cimport> end
+
+local function IMG_Load(file: cstring): *SDL_Surface <cimport> end
+
+
+global Sprite = @record{
+  renderer: *SDL_Renderer,
+  texture_path: string,
+  texture: *SDL_Texture,
+  width: number,
+  height: number,
+}
+
+function Sprite.create(renderer: *SDL_Renderer, texture_path: string, width: number, height: number)
+  local temp = IMG_Load(texture_path)
+  local sprite_sheet = SDL_CreateTextureFromSurface(renderer, temp)
+  SDL_FreeSurface(temp)
+  return (@Sprite){renderer, texture_path, texture = sprite_sheet, width, height}
 end
 
-function Sprite:offset(x: number, y: number)
-  self.offsetX = x
-  self.offsetY = y
+function Sprite:load_sprite(renderer: *SDL_Renderer)
+  local temp = IMG_Load(self.texture_path)
+  local sprite_sheet = SDL_CreateTextureFromSurface(renderer, temp)
+  SDL_FreeSurface(temp)
+  self.texture = sprite_sheet
 end
+
+
+
+
+
+
