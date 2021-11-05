@@ -1,0 +1,7 @@
+Get SDL config
+os.execute('sdl2-config --libs --cflags > sdl2-config')
+local f = io.open('sdl2-config')
+for line in f:lines() do
+  cflags(line)
+end
+f:close();
