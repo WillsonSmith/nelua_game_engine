@@ -1,6 +1,17 @@
 local SDL_Texture <cimport> = @record{}
-global Sprite = @record{texture: SDL_Texture}
+global Sprite = @record{
+  texture: SDL_Texture,
+  width: number,
+  height: number,
+  offsetX: number,
+  offsetY: number
+}
 
-function Sprite.create(texture: SDL_Texture)
-  return (@Sprite){texture}
+function Sprite.create(texture: SDL_Texture, width: number, height: number)
+  return (@Sprite){texture, width, height, offsetX = 0, offsetY = 0}
+end
+
+function Sprite:offset(x: number, y: number)
+  self.offsetX = x
+  self.offsetY = y
 end
